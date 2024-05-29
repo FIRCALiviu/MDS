@@ -2,10 +2,11 @@ import customtkinter as ctk
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class BudgetApplication(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.total_bars = 1  # Initialize with default value to avoid division by zero
+        self.total_bars = 4  # Initialize with the length of initial data
         self.title("Budget Application")
         self.geometry("1200x400")
         self.trend_data = None
@@ -20,14 +21,21 @@ class BudgetApplication(ctk.CTk):
         self.chart_frame = ctk.CTkFrame(self, width=1000, height=300)
         self.chart_frame.pack(padx=20, pady=20)
 
+        self.chart_frame.grid_propagate(False)
+        self.chart_frame.update_idletasks()
+
+        # Canvas for drawing bars
+        self.canvas = ctk.CTkCanvas(self.chart_frame, width=1000, height=300, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+
         # Update button
         self.update_button = ctk.CTkButton(self, text="Update", command=self.update_data)
         self.update_button.pack(pady=10)
 
         # Input field
-        self.input_field = ctk.CTkEntry(self, width=100, placeholder_text="bar {number} {value} OR add {column_number} {Note}")
+        self.input_field = ctk.CTkEntry(self, width=100,
+                                        placeholder_text="bar {number} {value} OR add {column_number} {Note}")
         self.input_field.pack()
-
 
         # Error label
         self.error_label = ctk.CTkLabel(
@@ -64,7 +72,6 @@ class BudgetApplication(ctk.CTk):
         # Entry field for currency
         self.currency_entry = ctk.CTkEntry(self, width=100, placeholder_text="Currency (Leu, Euro, Dollar)")
         self.currency_entry.pack(pady=10)
-        
 
     def update_data(self):
         user_input = self.input_field.get().strip()
@@ -118,6 +125,7 @@ class BudgetApplication(ctk.CTk):
             self.graph(first_day, last_day)
         else:
             self.show_error("Invalid input format!")
+
     def show_error(self, message):
         self.error_label.configure(text=message)
         try:
@@ -141,7 +149,6 @@ class BudgetApplication(ctk.CTk):
         # Get the selected currency from the input field
         selected_currency = self.currency_entry.get().strip()
 
-
         # Check if the selected currency is valid
         if selected_currency not in conversion_rates:
             self.show_error("Invalid currency selected! Please enter either 'Leu', 'Euro', or 'Dollar'.")
@@ -150,19 +157,28 @@ class BudgetApplication(ctk.CTk):
         # Calculate the conversion factor based on the selected currency
         conversion_factor = conversion_rates[selected_currency]
 
-        # Convert the data to the selected currency
-        self.data = [value / conversion_factor for value in self.data]
+        # Check if this is the first conversion
+        if self.currency_flag == 0:  # Lei
+            # Convert the data to the selected currency
+            self.data = [value / conversion_factor for value in self.data]
+        elif self.currency_flag == 1:  # Euro
+            # Convert the data back to Lei and then to the selected currency
+            self.data = [value * conversion_rates["Euro"] / conversion_factor for value in self.data]
+        else:  # Dollar
+            # Convert the data back to Lei and then to the selected currency
+            self.data = [value * conversion_rates["Dollar"] / conversion_factor for value in self.data]
 
-
-
-        # Redraw the bars to reflect the updated data
+        # Set the new currency flag
+        if selected_currency == "Leu":
+            self.currency_flag = 0
+        elif selected_currency == "Euro":
+            self.currency_flag = 1
+        else:
+            self.currency_flag = 2
         self.draw_bars()
 
     def draw_bars(self):
-        x = np.linspace(1, self.total_bars, self.total_bars)
-        canvas = self.chart_frame._canvas
-        canvas.delete("all")
-
+        self.canvas.delete("all")
         frame_width = self.chart_frame.winfo_width()
         bar_spacing = 20
         outline_width = 2
@@ -174,7 +190,7 @@ class BudgetApplication(ctk.CTk):
                         (available_width - (self.total_bars - 1) * bar_spacing - total_outline_width) / self.total_bars)
         x = bar_spacing
         canvas_bg_color = "#c0c9d1" if self.theme == "light" else "#2c3e50"
-        canvas.config(bg=canvas_bg_color)
+        self.canvas.config(bg=canvas_bg_color)
 
         # Calculate the maximum value based on the selected currency
         max_value = max(v for v in self.data)
@@ -185,27 +201,29 @@ class BudgetApplication(ctk.CTk):
             y = 300 - bar_height
 
             bar_colors = ["#2ecc71", "#3498db", "#9b59b6", "#f1c40f"] if self.theme == "light" else ["#34495e",
-                                                                                                     "#2c3e50",
+                                                                                                     "#B05E4C",
                                                                                                      "#95a5a6",
                                                                                                      "#bdc3c7"]
             fill_color = bar_colors[i % len(bar_colors)]
-            canvas.create_rectangle(
-                x, y, x + bar_width, 300, fill=fill_color, outline="black"
+            self.canvas.create_rectangle(
+                x, y, x + bar_width, 300, fill=fill_color, outline=canvas_bg_color  # match outline to canvas background color
             )
             if i in self.notes:
                 note_text = self.notes[i]
                 text_x = x + bar_width // 2
                 text_y = y - 10
-                canvas.create_text(text_x, text_y, text=note_text, anchor="center", font=("Arial", 8),
-                                   fill='white' if self.theme == 'dark' else 'black')
+                self.canvas.create_text(text_x, text_y, text=note_text, anchor="center", font=("Arial", 8),
+                                        fill='white' if self.theme == 'dark' else 'black')
 
             # Add text with the value of the bar
-            canvas.create_text(x + bar_width / 2, y - 25, text=str(round(value,2)), fill='white' if self.theme == 'dark' else 'black')
+            self.canvas.create_text(x + bar_width / 2, y - 25, text=str(round(value, 2)),
+                                    fill='white' if self.theme == 'dark' else 'black')
 
             x += bar_width + bar_spacing
         if self.trend_data is not None:
             # Plot the trend line on top of the bars
             plt.plot(x, self.trend_data, color="red", linestyle="-")
+
     def toggle_theme(self):
         if self.theme == "light":
             self.theme = "dark"
@@ -239,45 +257,6 @@ class BudgetApplication(ctk.CTk):
         self.draw_bars()
         self.show_error(f"Budget set for {duration} days. {self.total_bars} bars displayed.")
 
-    def convert_currency(self):
-        # Conversion rates (assuming approximate values)
-        conversion_rates = {
-            "Leu": 1,
-            "Euro": 5,  # 1 EUR ~ 5 RON (approximate)
-            "Dollar": 4.3,  # 1 USD ~ 4.3 RON (approximate)
-        }
-
-        # Get the selected currency from the input field
-        selected_currency = self.currency_entry.get().strip()
-
-
-        # Check if the selected currency is valid
-        if selected_currency not in conversion_rates:
-            self.show_error("Invalid currency selected! Please enter either 'Leu', 'Euro', or 'Dollar'.")
-            return
-
-        # Calculate the conversion factor based on the selected currency
-        conversion_factor = conversion_rates[selected_currency]
-
-        # Check if this is the first conversion
-        if self.currency_flag == 0:  # Lei
-            # Convert the data to the selected currency
-            self.data = [value / conversion_factor for value in self.data]
-        elif self.currency_flag == 1:  # Euro
-            # Convert the data back to Lei and then to the selected currency
-            self.data = [value * conversion_rates["Euro"] / conversion_factor for value in self.data]
-        else:  # Dollar
-            # Convert the data back to Lei and then to the selected currency
-            self.data = [value * conversion_rates["Dollar"] / conversion_factor for value in self.data]
-
-        # Set the new currency flag
-        if selected_currency == "Leu":
-            self.currency_flag = 0
-        elif selected_currency == "Euro":
-            self.currency_flag = 1
-        else:
-            self.currency_flag = 2
-        self.draw_bars()
     def graph(self, first_day, last_day):
         # Validate input for first_day and last_day
         try:
@@ -315,6 +294,7 @@ class BudgetApplication(ctk.CTk):
 
         # Clear the trend line data after displaying the plot
         self.trend_data = None
+
 
 if __name__ == "__main__":
     app = BudgetApplication()
