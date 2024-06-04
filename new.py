@@ -186,7 +186,12 @@ class BudgetApplication(ctk.CTk):
     def draw_bars(self):
         self.canvas.delete("all")
         frame_width = self.chart_frame.winfo_width()
-        bar_spacing = 5
+        frame_height = self.chart_frame.winfo_height()  # Get the height of the chart frame
+        padding = 50  # Define padding at the top and bottom
+        canvas_height = frame_height if frame_height > 0 else 600  # Default to 600 if frame_height is not properly obtained
+        self.canvas.config(height=canvas_height)
+        
+        bar_spacing = 6
         outline_width = 2
         margins = 2 * bar_spacing
         available_width = frame_width - margins
@@ -198,39 +203,48 @@ class BudgetApplication(ctk.CTk):
         canvas_bg_color = "#c0c9d1" if self.theme == "light" else "#2c3e50"
         self.canvas.config(bg=canvas_bg_color)
 
-        # Calculate the maximum value based on the selected currency
-        max_value = max(v for v in self.data)
+        # Calculate the maximum absolute value based on the data
+        max_value = max(abs(v) for v in self.data)
         if max_value == 0:
             max_value = 1
-        max_value = max(max_value,-max_value)
+
+        y_base = canvas_height / 2  # Adjust the base y coordinate to the middle of the canvas
+
         for i, value in enumerate(self.data):
             # Adjust the height of the bars based on the maximum value
-            bar_height = (value / max_value) * 200 * 0.7
-            y = 300 - bar_height
+            bar_height = (abs(value) / max_value) * (canvas_height / 2 - padding) * 0.7
+            if value >= 0:
+                y_top = y_base - bar_height
+                y_bottom = y_base
+            else:
+                y_top = y_base
+                y_bottom = y_base + bar_height
+
 
             bar_colors = ["#2ecc71", "#3498db", "#9b59b6", "#f1c40f"] if self.theme == "light" else ["#34495e",
-                                                                                                     "#B05E4C",
-                                                                                                     "#95a5a6",
-                                                                                                     "#bdc3c7"]
+                                                                                                    "#B05E4C",
+                                                                                                    "#95a5a6",
+                                                                                                    "#bdc3c7"]
             fill_color = bar_colors[i % len(bar_colors)]
             self.canvas.create_rectangle(
-                x, y, x + bar_width, 300, fill=fill_color, outline=canvas_bg_color  # match outline to canvas background color
+                x, y_top, x + bar_width, y_bottom, fill=fill_color, outline=canvas_bg_color  # match outline to canvas background color
             )
             if i in self.notes:
                 note_text = self.notes[i]
                 text_x = x + bar_width // 2
-                text_y = y - 10
+                text_y = y_top - 10 if value >= 0 else y_bottom + 10
                 self.canvas.create_text(text_x, text_y, text=note_text, anchor="center", font=("Arial", 8),
                                         fill='white' if self.theme == 'dark' else 'black')
 
             # Add text with the value of the bar
-            self.canvas.create_text(x + bar_width / 2, y - 25, text=str(round(value, 2)),
+            self.canvas.create_text(x + bar_width / 2, y_top - 25 if value >= 0 else y_bottom + 25, text=str(round(value, 2)),
                                     fill='white' if self.theme == 'dark' else 'black')
 
             x += bar_width + bar_spacing
+
         if self.trend_data is not None:
             # Plot the trend line on top of the bars
-            plt.plot(x, self.trend_data, color="red", linestyle="-")
+            plt.plot(x, self.trend_data, color="red")
 
     def toggle_theme(self):
         if self.theme == "light":
