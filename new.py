@@ -76,9 +76,100 @@ class BudgetApplication(ctk.CTk):
         self.currency_entry = ctk.CTkEntry(self, width=100, placeholder_text="Currency (Leu, Euro, Dollar)")
         self.currency_entry.pack(pady=10)
         
+        self.add_note_button = ctk.CTkButton(self, text="Add a note", command=self.add_note_button)
+        self.add_note_button.pack(pady = 10)
+        self.add_note_entry = ctk.CTkEntry(self, width=100, placeholder_text="{day} {note}")
+        self.add_note_entry.pack(pady = 10)
+        self.repeat_button = ctk.CTkButton(self, text="Add a repeated purchase", command=self.repeat_button_method)
+        self.repeat_button.pack(pady = 10)
+        self.repeat_entry = ctk.CTkEntry(self, width=200, placeholder_text="{day it starts} {interval} {sum}")
+        self.repeat_entry.pack(pady= 10)
+        
+        self.bar_set_button = ctk.CTkButton(self, text="Set money left for a day", command=self.bar_set_method)
+        self.bar_set_button.pack(pady =10)
+        self.bar_set_entry= ctk.CTkEntry(self, width=200, placeholder_text="{day} {money left}")
+        self.bar_set_entry.pack(pady= 10)
+        
+        self.graph_display_button = ctk.CTkButton(self, text="Display trend line for a period", command=self.graph_display_method)
+        self.graph_display_button.pack(pady= 10)
+        self.graph_display_entry = ctk.CTkEntry(self, width=200, placeholder_text="{first day} {last day}")
+        self.graph_display_entry.pack(pady=10)
+
         self.fetch_data()
         self.draw_bars()
+    def graph_display_method(self):
+        user_input = self.graph_display_entry.get()
+        parts = user_input.split(" ")
+        if len(parts) != 2:
+                self.show_error("Invalid graph command format! Use: graph {first_day} {last_day}")
+                return
+        try:
+            first_day = int(parts[0])
+            last_day = int(parts[1])
+        except ValueError:
+            self.show_error("Invalid date range! Please enter integers for days.")
+            return
+        self.graph(first_day, last_day)    
+    
+    def bar_set_method(self):
+        try:
+            user_input = self.bar_set_entry.get()
+            parts = user_input.split(" ")
+            if len(parts) != 2:
+                raise ValueError
+            bar_number = int(parts[0]) - 1
+            value = float(parts[1])
+        except ValueError:
+            self.show_error("Invalid input format! Use: {number} {value}")
+            return
 
+        if bar_number < 0 or bar_number >= len(self.data):
+            self.show_error("Invalid bar number! Please enter a number between 1 and {}".format(len(self.data)))
+            return
+
+        self.data[bar_number] = value
+        self.draw_bars()
+    def repeat_button_method(self):
+        user_input = self.repeat_entry.get()
+        parts = user_input.split(" ")
+        try:
+            if len(parts) !=3:
+                raise ValueError
+            parts = user_input.split()
+            start_date  = int(parts[0])
+            period = int(parts[1])
+            cost = float(parts[2])
+        except ValueError:
+            self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
+
+        start_date -=1
+        if start_date>=0:
+            for i in range(start_date,len(self.data),period):
+                self.data[i]-=cost
+        else:
+            self.show_error("Start date must be greater than 1")
+        self.draw_bars()
+    def add_note_button(self):
+        user_input = self.add_note_entry.get()
+        parts = user_input.split(" ")
+
+        
+        if len(parts) < 2:
+            self.show_error("Invalid note format! Use:{column_number} {Note}")
+            return
+        try:
+            column_number = int(parts[0]) - 1
+            note = " ".join(parts[1:])
+        except ValueError:
+            self.show_error("Invalid column number or note format!")
+            return
+
+        if column_number < 0 or column_number >= len(self.data):
+            self.show_error("Invalid column number! Please enter a number between 1 and {}".format(len(self.data)))
+            return
+
+        self.notes[column_number] = note
+        self.draw_bars()
     def update_data(self):
         user_input = self.input_field.get().strip()
         parts = user_input.split(" ")
