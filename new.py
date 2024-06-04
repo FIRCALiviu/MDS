@@ -123,6 +123,24 @@ class BudgetApplication(ctk.CTk):
                 self.show_error("Invalid date range! Please enter integers for days.")
                 return
             self.graph(first_day, last_day)
+        elif user_input.startswith("repeat"):
+            try:
+                if len(parts) !=4:
+                    self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
+                parts = user_input.split()
+                start_date  = int(parts[1])
+                period = int(parts[2])
+                cost = int(parts[3])
+            except ValueError:
+                self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
+            
+            start_date -=1
+            if start_date>=0:
+                for i in range(start_date,len(self.data),period):
+                    self.data[i]-=cost
+            else:
+                self.show_error("Start date must be greater than 1")
+            self.draw_bars()
         else:
             self.show_error("Invalid input format!")
 
@@ -194,7 +212,9 @@ class BudgetApplication(ctk.CTk):
 
         # Calculate the maximum value based on the selected currency
         max_value = max(v for v in self.data)
-
+        if max_value == 0:
+            max_value = 1
+        max_value = max(max_value,-max_value)
         for i, value in enumerate(self.data):
             # Adjust the height of the bars based on the maximum value
             bar_height = (value / max_value) * 200 * 0.7
