@@ -1,13 +1,13 @@
 import customtkinter as ctk
 import matplotlib.pyplot as plt
 import numpy as np
-import mysql.connector
+
 
 class BudgetApplication(ctk.CTk):
-    def __init__(self,username,password):
+    def __init__(self):
         super().__init__()
 
-        self.get_connection(username,password)
+        
 
         self.total_bars = 4  # Initialize with the length of initial data
         self.title("Budget Application")
@@ -75,10 +75,7 @@ class BudgetApplication(ctk.CTk):
         self.add_note_button.pack(pady = 10)
         self.add_note_entry = ctk.CTkEntry(self, width=100, placeholder_text="{day} {note}")
         self.add_note_entry.pack(pady = 10)
-        self.repeat_button = ctk.CTkButton(self, text="Add a repeated purchase", command=self.repeat_button_method)
-        self.repeat_button.pack(pady = 10)
-        self.repeat_entry = ctk.CTkEntry(self, width=200, placeholder_text="{day it starts} {interval} {sum}")
-        self.repeat_entry.pack(pady= 10)
+        
         
         self.bar_set_button = ctk.CTkButton(self, text="Set money left for a day", command=self.bar_set_method)
         self.bar_set_button.pack(pady =10)
@@ -90,7 +87,7 @@ class BudgetApplication(ctk.CTk):
         self.graph_display_entry = ctk.CTkEntry(self, width=200, placeholder_text="{first day} {last day}")
         self.graph_display_entry.pack(pady=10)
 
-        self.fetch_data()
+        
         self.draw_bars()
     def graph_display_method(self):
         user_input = self.graph_display_entry.get()
@@ -124,27 +121,7 @@ class BudgetApplication(ctk.CTk):
 
         self.data[bar_number] = value
         self.draw_bars()
-    def repeat_button_method(self):
-        user_input = self.repeat_entry.get()
-        parts = user_input.split(" ")
-        try:
-            if len(parts) !=3:
-                raise ValueError
-            parts = user_input.split()
-            start_date  = int(parts[0])
-            period = int(parts[1])
-            cost = float(parts[2])
-        except ValueError:
-            self.show_error("Invalid input ! use {start_date} {period} {cost}")
-            return
-
-        start_date -=1
-        if start_date>=0:
-            for i in range(start_date,len(self.data),period):
-                self.data[i]-=cost
-        else:
-            self.show_error("Start date must be greater than 1")
-        self.draw_bars()
+    
     def add_note_button(self):
         user_input = self.add_note_entry.get()
         parts = user_input.split(" ")
@@ -356,140 +333,13 @@ class BudgetApplication(ctk.CTk):
 
         # Clear the trend line data after displaying the plot
         self.trend_data = None
-    def get_connection(self,username,password):
-        mydb = mysql.connector.connect(
-        
-        host="localhost",
-        user=username,
-        password=password,
-        database=username+"db"
-        )
-        self.db = mydb
-        
-        c =mydb.cursor()
-        c.execute(
-            """
-            create table if not exists valori(
+    
+    
 
-            day INT ,
-            value decimal(20,3) not null,
-            primary key(day)
-            );
-
-            """
-        )
-        c.execute(
-            """
-            create table  if not exists notes(
-            day INT ,
-            note varchar(255) not null,
-            primary key(day)
-
-            );
-
-            """
-        )
-        c.close()
-    def update_value(self,day,value,note=None):
-        c = self.db.cursor()
-        if note is None:
-            sql1="""
-                delete from valori
-                where  day =%s
-                """
-            
-            c.execute(
-                sql1,(day,)
-            )
-            sql2 ="""
-                insert into valori
-                values(%s,%s)
-
-                """
-            
-            c.execute(
-                sql2,(day,value)
-            )
-        else:
-            sql1="""
-                delete from valori
-                where  day =%s
-                """
-            
-            c.execute(
-                sql1,(day,)
-            )
-            sql2 ="""
-                insert into valori
-                values(%s,%s)
-
-                """
-            
-            c.execute(
-                sql2,(day,value)
-            )
-            sql3 = """
-                    delete from notes
-                    where  day =%s
-                    """
-            c.execute(
-                sql3,(day,)
-            )
-            sql4= """
-                insert into notes
-                values(%s,%s)
-
-                """
-            c.execute(
-                sql4,(day,note)
-            )
-        c.close()
-        self.db.commit()
-
-    def fetch_data(self):
-        c = self.db.cursor()
-        c.execute("select * from valori")
-        vec = []    
-        for x in c:
-            vec.append(x)
-        
-        c.close()
-        c = self.db.cursor()
-        c.execute("select * from notes")
-        notes ={}
-        for day,note in c:
-            notes[day] = note
-        c.close()
-        if vec:
-            self.data = [1]*len(vec)
-            
-            for i,val in vec:
-                self.data[i]=float(val)
-            self.total_bars = len(vec)
-        if notes:
-            self.notes = notes
-    def clear_data(self):
-        sql1 ="""
-            delete from valori    
-            """
-        sql2="""
-            delete from notes
-            """
-        c = self.db.cursor()
-        c.execute(sql1)
-        c.execute(sql2)
-        c.close()
-    def save_data_exit(self):
-        self.clear_data()
-        for i,v in enumerate(self.data):
-            self.update_value(i,v)
-        for i in self.notes:
-            self.update_value(i,self.data[i],self.notes[i])
-        
-        self.db.close()
+    
 
 
 if __name__ == "__main__":
-    app = BudgetApplication("budgetusertest","password1234")
+    app = BudgetApplication()
     app.mainloop()
     app.save_data_exit()

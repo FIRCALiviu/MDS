@@ -490,6 +490,7 @@ class BudgetApplication(ctk.CTk):
 
 
 if __name__ == "__main__":
-    app = BudgetApplication("budgetusertest","password1234")
+    username,password = input().split()
+    app = BudgetApplication(username,password)
     app.mainloop()
     app.save_data_exit()
