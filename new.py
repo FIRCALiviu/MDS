@@ -84,12 +84,12 @@ class BudgetApplication(ctk.CTk):
         parts = user_input.split(" ")
 
         if user_input.startswith("add"):
-            if len(parts) != 3:
+            if len(parts) < 3:
                 self.show_error("Invalid note format! Use: add {column_number} {Note}")
                 return
             try:
                 column_number = int(parts[1]) - 1
-                note = parts[2]
+                note = " ".join(parts[2:])
             except ValueError:
                 self.show_error("Invalid column number or note format!")
                 return
@@ -97,7 +97,7 @@ class BudgetApplication(ctk.CTk):
             if column_number < 0 or column_number >= len(self.data):
                 self.show_error("Invalid column number! Please enter a number between 1 and {}".format(len(self.data)))
                 return
-            
+
             self.notes[column_number] = note
             self.draw_bars()
 
@@ -129,24 +129,6 @@ class BudgetApplication(ctk.CTk):
                 self.show_error("Invalid date range! Please enter integers for days.")
                 return
             self.graph(first_day, last_day)
-        elif user_input.startswith("repeat"):
-            try:
-                if len(parts) !=4:
-                    self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
-                parts = user_input.split()
-                start_date  = int(parts[1])
-                period = int(parts[2])
-                cost = int(parts[3])
-            except ValueError:
-                self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
-            
-            start_date -=1
-            if start_date>=0:
-                for i in range(start_date,len(self.data),period):
-                    self.data[i]-=cost
-            else:
-                self.show_error("Start date must be greater than 1")
-            self.draw_bars()
         else:
             self.show_error("Invalid input format!")
 
