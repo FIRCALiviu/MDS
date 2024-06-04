@@ -428,8 +428,19 @@ class BudgetApplication(ctk.CTk):
             self.total_bars = len(vec)
         if notes:
             self.notes = notes
+    def clear_data(self):
+        sql1 ="""
+            delete from valori    
+            """
+        sql2="""
+            delete from notes
+            """
+        c = self.db.cursor()
+        c.execute(sql1)
+        c.execute(sql2)
+        c.close()
     def save_data_exit(self):
-        
+        self.clear_data()
         for i,v in enumerate(self.data):
             self.update_value(i,v)
         for i in self.notes:
