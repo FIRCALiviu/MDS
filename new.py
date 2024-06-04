@@ -107,7 +107,7 @@ class BudgetApplication(ctk.CTk):
                 if len(parts) != 3:
                     raise ValueError
                 bar_number = int(parts[1]) - 1
-                value = int(parts[2])
+                value = float(parts[2])
             except ValueError:
                 self.show_error("Invalid input format! Use: bar {number} {value}")
                 return
@@ -136,7 +136,7 @@ class BudgetApplication(ctk.CTk):
                 parts = user_input.split()
                 start_date  = int(parts[1])
                 period = int(parts[2])
-                cost = int(parts[3])
+                cost = float(parts[3])
             except ValueError:
                 self.show_error("Invalid input ! use repeat {start_date} {period} {cost}")
 
@@ -325,7 +325,11 @@ class BudgetApplication(ctk.CTk):
         plt.plot(x, trend_line, color='red', linestyle='-', label='Trend Line')
         plt.xlabel('Days')
         plt.ylabel('Budget')
-        plt.title(f'Budget Trend (Days {first_day} - {last_day})')
+        if m*len(self.data)+c>=0:
+            
+            plt.title('You will break even according to the best fit line!')
+        else:
+            plt.title("You won't break even according to the best fit line")
         plt.legend()
         plt.grid(True)
         plt.xlim(0,len(self.data))
