@@ -1,11 +1,14 @@
 import customtkinter as ctk
 import matplotlib.pyplot as plt
 import numpy as np
-
+import mysql.connector
 
 class BudgetApplication(ctk.CTk):
-    def __init__(self):
+    def __init__(self,username,password):
         super().__init__()
+
+        self.get_connection(username,password)
+
         self.total_bars = 4  # Initialize with the length of initial data
         self.title("Budget Application")
         self.geometry("1200x400")
@@ -55,7 +58,7 @@ class BudgetApplication(ctk.CTk):
         # Currency flag indicating the current currency type (0 for lei, 1 for euro, 2 for dollars)
         self.currency_flag = 0  # Default to lei
 
-        self.draw_bars()
+        
 
         # Theme toggle button
         self.set_duration_button = ctk.CTkButton(self, text="Set Budget Duration", command=self.set_budget_duration)
@@ -72,6 +75,9 @@ class BudgetApplication(ctk.CTk):
         # Entry field for currency
         self.currency_entry = ctk.CTkEntry(self, width=100, placeholder_text="Currency (Leu, Euro, Dollar)")
         self.currency_entry.pack(pady=10)
+        
+        self.fetch_data()
+        self.draw_bars()
 
     def update_data(self):
         user_input = self.input_field.get().strip()
@@ -91,7 +97,7 @@ class BudgetApplication(ctk.CTk):
             if column_number < 0 or column_number >= len(self.data):
                 self.show_error("Invalid column number! Please enter a number between 1 and {}".format(len(self.data)))
                 return
-
+            
             self.notes[column_number] = note
             self.draw_bars()
 
@@ -314,8 +320,129 @@ class BudgetApplication(ctk.CTk):
 
         # Clear the trend line data after displaying the plot
         self.trend_data = None
+    def get_connection(self,username,password):
+        mydb = mysql.connector.connect(
+        
+        host="localhost",
+        user=username,
+        password=password,
+        database=username+"db"
+        )
+        self.db = mydb
+        
+        c =mydb.cursor()
+        c.execute(
+            """
+            create table if not exists valori(
+
+            day INT ,
+            value decimal(20,3) not null,
+            primary key(day)
+            );
+
+            """
+        )
+        c.execute(
+            """
+            create table  if not exists notes(
+            day INT ,
+            note varchar(255) not null,
+            primary key(day)
+
+            );
+
+            """
+        )
+        c.close()
+    def update_value(self,day,value,note=None):
+        c = self.db.cursor()
+        if note is None:
+            sql1="""
+                delete from valori
+                where  day =%s
+                """
+            
+            c.execute(
+                sql1,(day,)
+            )
+            sql2 ="""
+                insert into valori
+                values(%s,%s)
+
+                """
+            
+            c.execute(
+                sql2,(day,value)
+            )
+        else:
+            sql1="""
+                delete from valori
+                where  day =%s
+                """
+            
+            c.execute(
+                sql1,(day,)
+            )
+            sql2 ="""
+                insert into valori
+                values(%s,%s)
+
+                """
+            
+            c.execute(
+                sql2,(day,value)
+            )
+            sql3 = """
+                    delete from notes
+                    where  day =%s
+                    """
+            c.execute(
+                sql3,(day,)
+            )
+            sql4= """
+                insert into notes
+                values(%s,%s)
+
+                """
+            c.execute(
+                sql4,(day,note)
+            )
+        c.close()
+        self.db.commit()
+
+    def fetch_data(self):
+        c = self.db.cursor()
+        c.execute("select * from valori")
+        vec = []    
+        for x in c:
+            vec.append(x)
+        
+        c.close()
+        c = self.db.cursor()
+        c.execute("select * from notes")
+        notes ={}
+        for day,note in c:
+            notes[day] = note
+        c.close()
+        if vec:
+            self.data = [1]*len(vec)
+            
+            for i,val in vec:
+                self.data[i]=float(val)
+            self.total_bars = len(vec)
+        if notes:
+            self.notes = notes
+    def save_data_exit(self):
+        
+        for i,v in enumerate(self.data):
+            self.update_value(i,v)
+        for i in self.notes:
+            self.update_value(i,self.data[i],self.notes[i])
+        
+        self.db.close()
 
 
 if __name__ == "__main__":
-    app = BudgetApplication()
+    app = BudgetApplication("budgetusertest","password1234")
     app.mainloop()
+    app.save_data_exit()
