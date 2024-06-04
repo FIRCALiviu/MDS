@@ -198,7 +198,7 @@ class BudgetApplication(ctk.CTk):
     def draw_bars(self):
         self.canvas.delete("all")
         frame_width = self.chart_frame.winfo_width()
-        bar_spacing = 20
+        bar_spacing = 5
         outline_width = 2
         margins = 2 * bar_spacing
         available_width = frame_width - margins
@@ -308,7 +308,7 @@ class BudgetApplication(ctk.CTk):
         plt.title(f'Budget Trend (Days {first_day} - {last_day})')
         plt.legend()
         plt.grid(True)
-
+        plt.xlim(0,len(self.data))
         # Show the trend line plot
         plt.show()
 
