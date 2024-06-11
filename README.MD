@@ -4,6 +4,7 @@ Aplicatie consta intr-un program scris in python, care cu ajutorul lui mysql ofe
 
 ![alt text](image-1.png)
 
+## [Demo offline](/demo/2024-06-11%2020-19-33.mkv)
 ### Backlogul cu user stories:
 https://trello.com/b/xGQJSRWC/proiect-gestionare-buget
 
