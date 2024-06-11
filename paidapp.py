@@ -94,7 +94,7 @@ class BudgetApplication(ctk.CTk):
         self.draw_bars()
     def graph_display_method(self):
         user_input = self.graph_display_entry.get()
-        parts = user_input.split(" ")
+        parts = user_input.split()
         if len(parts) != 2:
                 self.show_error("Invalid graph command format! Use: graph {first_day} {last_day}")
                 return
@@ -109,7 +109,7 @@ class BudgetApplication(ctk.CTk):
     def bar_set_method(self):
         try:
             user_input = self.bar_set_entry.get()
-            parts = user_input.split(" ")
+            parts = user_input.split()
             if len(parts) != 2:
                 raise ValueError
             bar_number = int(parts[0]) - 1
@@ -126,7 +126,7 @@ class BudgetApplication(ctk.CTk):
         self.draw_bars()
     def repeat_button_method(self):
         user_input = self.repeat_entry.get()
-        parts = user_input.split(" ")
+        parts = user_input.split()
         try:
             if len(parts) !=3:
                 raise ValueError
@@ -147,7 +147,7 @@ class BudgetApplication(ctk.CTk):
         self.draw_bars()
     def add_note_button(self):
         user_input = self.add_note_entry.get()
-        parts = user_input.split(" ")
+        parts = user_input.split()
 
         
         if len(parts) < 2:
