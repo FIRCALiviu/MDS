@@ -51,7 +51,7 @@ class BudgetApplication(ctk.CTk):
         self.notes = {}
 
         # Currency flag indicating the current currency type (0 for lei, 1 for euro, 2 for dollars)
-        self.currency_flag = "Lei"  # Default to lei
+        self.currency_flag = "Leu"  # Default to lei
 
         
 
