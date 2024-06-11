@@ -488,9 +488,11 @@ class BudgetApplication(ctk.CTk):
         
         self.db.close()
 
-
+import sys
 if __name__ == "__main__":
-    username,password = input().split()
+    username,password = sys.argv[1],sys.argv[2]
+    
     app = BudgetApplication(username,password)
     app.mainloop()
-    app.save_data_exit()
+    app.test_update_value()
+    #app.save_data_exit()

@@ -40,7 +40,7 @@ def login():
     except Exception:
         show_error(app,"Invalid password or account!")
         return
-    command = f"echo {username} {password} | python paidapp.py  "
+    command = f" python paidapp.py {username}  {password}"
     os.system(command)
     
 # Create and place username label and entry

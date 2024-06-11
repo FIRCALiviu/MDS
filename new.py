@@ -444,8 +444,43 @@ class BudgetApplication(ctk.CTk):
                 sql4,(day,note)
             )
         c.close()
-        self.db.commit()
+        
 
+    def test_update_value(self):
+        self.clear_data()
+        self.update_value(0,5,"bine")
+        self.update_value(1,-90,'string spatiu')
+        self.update_value(2,-10**6,'string foarte mmaaaa'+'a'*50+'e')
+        self.update_value(3,10**6)
+        self.update_value(4,0.5)
+
+        self.fetch_data()
+    
+        if self.data==[5,-90,-10**6,10**6,0.5] and self.notes=={0:'bine',1:'string spatiu',2:'string foarte mmaaaa'+'a'*50+'e'}:
+            print('test 1 passed')
+        else:
+            print('test 1 failed')
+
+        test2 = [(i,i*i) for i in range(2000)]
+        notes = {9:'bineeeeeeeeee',100:'st ahs tahs thas thast'}
+        self.clear_data()
+        
+        for i,val in test2:
+            self.update_value(i,val,notes.get(i,None))
+        self.fetch_data()
+        if self.data==[ val for i,val in test2] and self.notes == notes:
+            print("test 2 passed")
+        else:
+            print('test 2 failed')
+
+        self.clear_data()
+        
+        self.update_value(0,0.001)
+        self.fetch_data()
+        if self.data == [0.001] and self.notes=={}:
+            print('test 3 passed')
+        else:
+            print('test 3 failed')
     def fetch_data(self):
         c = self.db.cursor()
         c.execute("select * from valori")
@@ -466,7 +501,7 @@ class BudgetApplication(ctk.CTk):
             for i,val in vec:
                 self.data[i]=float(val)
             self.total_bars = len(vec)
-        if notes:
+        
             self.notes = notes
     def clear_data(self):
         sql1 ="""
@@ -485,11 +520,21 @@ class BudgetApplication(ctk.CTk):
             self.update_value(i,v)
         for i in self.notes:
             self.update_value(i,self.data[i],self.notes[i])
-        
+        self.db.commit()
         self.db.close()
 
-
+    def clear_data(self):
+        sql1 ="""
+            delete from valori    
+            """
+        sql2="""
+            delete from notes
+            """
+        c = self.db.cursor()
+        c.execute(sql1)
+        c.execute(sql2)
+        c.close()
 if __name__ == "__main__":
     app = BudgetApplication("budgetusertest","password1234")
     app.mainloop()
-    app.save_data_exit()
+    app.test_update_value()

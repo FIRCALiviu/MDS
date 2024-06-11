@@ -341,5 +341,4 @@ class BudgetApplication(ctk.CTk):
 
 if __name__ == "__main__":
     app = BudgetApplication()
-    app.mainloop()
-    app.save_data_exit()
+    app.mainloop()   
