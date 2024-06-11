@@ -433,7 +433,7 @@ class BudgetApplication(ctk.CTk):
                 sql4,(day,note)
             )
         c.close()
-        self.db.commit()
+        
 
     def fetch_data(self):
         c = self.db.cursor()
@@ -474,7 +474,7 @@ class BudgetApplication(ctk.CTk):
             self.update_value(i,v)
         for i in self.notes:
             self.update_value(i,self.data[i],self.notes[i])
-        
+        self.db.commit()
         self.db.close()
 
 import sys
