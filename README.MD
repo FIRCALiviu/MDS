@@ -5,5 +5,5 @@
 ![alt text](image-1.png)
 
 ### Backlogul:
-![alt text](image.png)
+https://trello.com/b/xGQJSRWC/proiect-gestionare-buget
 
