@@ -1,5 +1,5 @@
 # Aplicatie de budgetare 
-
+Aplicatie consta intr-un program scris in python, care cu ajutorul lui mysql ofera peristenta datelor. Utilizatorii pot sa seteze in cate zile este perioada de budgetare, cati bani au in fiecare zi ssmd.
 ### Screenshot cu UI
 
 ![alt text](image-1.png)
