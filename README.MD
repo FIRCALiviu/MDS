@@ -25,3 +25,7 @@ Resultat (codul a fost modificat putin ca sa se incadreze in aplicatie):
 
 (implementat in metoda test_update_value in new.py)
 
+### Rapoarte bug
+
+(vezi backlog)
+
