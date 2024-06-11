@@ -51,7 +51,7 @@ class BudgetApplication(ctk.CTk):
         self.notes = {}
 
         # Currency flag indicating the current currency type (0 for lei, 1 for euro, 2 for dollars)
-        self.currency_flag = 0  # Default to lei
+        self.currency_flag = "Lei"  # Default to lei
 
         
 
@@ -187,7 +187,9 @@ class BudgetApplication(ctk.CTk):
             "Euro": 5,  # 1 EUR ~ 5 RON (approximate)
             "Dollar": 4.3,  # 1 USD ~ 4.3 RON (approximate)
         }
+        
 
+    
         # Get the selected currency from the input field
         selected_currency = self.currency_entry.get().strip()
 
@@ -195,28 +197,15 @@ class BudgetApplication(ctk.CTk):
         if selected_currency not in conversion_rates:
             self.show_error("Invalid currency selected! Please enter either 'Leu', 'Euro', or 'Dollar'.")
             return
-
+        # formula for the value in the new currency
+        # new value =old value* rate new / rate old
         # Calculate the conversion factor based on the selected currency
-        conversion_factor = conversion_rates[selected_currency]
-
-        # Check if this is the first conversion
-        if self.currency_flag == 0:  # Lei
-            # Convert the data to the selected currency
-            self.data = [value / conversion_factor for value in self.data]
-        elif self.currency_flag == 1:  # Euro
-            # Convert the data back to Lei and then to the selected currency
-            self.data = [value * conversion_rates["Euro"] / conversion_factor for value in self.data]
-        else:  # Dollar
-            # Convert the data back to Lei and then to the selected currency
-            self.data = [value * conversion_rates["Dollar"] / conversion_factor for value in self.data]
+        conversion_factor =conversion_rates[self.currency_flag]/conversion_rates[selected_currency]
+ 
+        self.data = list(map( lambda x : x*conversion_factor,self.data))
 
         # Set the new currency flag
-        if selected_currency == "Leu":
-            self.currency_flag = 0
-        elif selected_currency == "Euro":
-            self.currency_flag = 1
-        else:
-            self.currency_flag = 2
+        self.currency_flag=selected_currency
         self.draw_bars()
 
     def draw_bars(self):
@@ -494,5 +483,5 @@ if __name__ == "__main__":
     
     app = BudgetApplication(username,password)
     app.mainloop()
-    app.test_update_value()
-    #app.save_data_exit()
+    #app.test_update_value()
+    app.save_data_exit()

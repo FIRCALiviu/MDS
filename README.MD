@@ -29,3 +29,10 @@ Resultat (codul a fost modificat putin ca sa se incadreze in aplicatie):
 
 (vezi backlog)
 
+### Refactoring
+
+Before:
+![alt text](<Screenshot from 2024-06-11 16-20-45.png>)
+
+After:
+![alt text](image-6.png)
