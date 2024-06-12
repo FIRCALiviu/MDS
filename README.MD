@@ -2,11 +2,11 @@
 Aplicatie consta intr-un program scris in python, care cu ajutorul lui mysql ofera peristenta datelor. Utilizatorii pot sa seteze in cate zile este perioada de budgetare, cati bani au in fiecare zi ssmd.
 Instructiuni de folosire:
 - Set budget duration : ii se da numarul de zile si o sa se afiseze numarul de bari aferent
-- Convert : Se schimba unitatea sumei in moneda precizata optiunile sunt Leu ,Dollar, Euro
+- Convert : Se schimba unitatea banilor in moneda precizata optiunile sunt Leu ,Dollar, Euro
 - Add a note: Primul lucru este numarul zilei, si dupaia vine mesajul
 - Add repated purchase i,j,k: incepand de la ziua i la fiecare j zile platesc costul k
 - Set money left for a day: primul lucru este ziua (numar) si dupaia cat bani mai ai in acea zi (numar real)
-- Display trend i j: se afiseaza o best fit line pentru zilele i,j , pentru a prezice daca te vei incadra in targetul de budgetare
+- Display trend i j: se afiseaza o best fit line intre zilele i,j , pentru a prezice daca te vei incadra in targetul de budgetare
 
 ### Screenshot cu UI
 
